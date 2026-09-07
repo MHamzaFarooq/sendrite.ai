@@ -1,0 +1,46 @@
+appId: ai.sendrite.app
+productName: Sendrite
+directories:
+  output: release
+  buildResources: build
+
+files:
+  - out/**
+  - resources/**
+  - package.json
+
+asarUnpack:
+  # koffi loads a platform-specific .node binary at runtime; it cannot be
+  # read from inside the asar archive.
+  - '**/node_modules/koffi/**'
+
+win:
+  target:
+    - target: nsis
+      arch: [x64, arm64]
+  icon: build/icon.ico
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+
+mac:
+  target:
+    - target: dmg
+      arch: [x64, arm64]
+  icon: build/icon.icns
+  category: public.app-category.productivity
+  # Tray-only app: no dock icon, no window on launch.
+  extendInfo:
+    LSUIElement: true
+    NSAppleEventsUsageDescription: >-
+      Sendrite needs to send copy and paste keystrokes to the app you are
+      writing in, so it can read your selection and replace it.
+  hardenedRuntime: true
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+
+dmg:
+  artifactName: ${productName}-${version}-${arch}.dmg

@@ -1,0 +1,40 @@
+{
+  "name": "sendrite",
+  "version": "1.0.0",
+  "description": "Rewrite any text, in any app, without leaving the window.",
+  "main": "./out/main/index.js",
+  "author": "Sendrite",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "dev": "node scripts/run.mjs dev",
+    "build": "npm run typecheck && electron-vite build",
+    "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
+    "start": "node scripts/run.mjs preview",
+    "smoke": "node scripts/make-icons.mjs && node scripts/smoke-native.mjs",
+    "pack:win": "npm run build && electron-builder --win --publish never",
+    "pack:mac": "npm run build && electron-builder --mac --publish never"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.124.0",
+    "@electron-toolkit/preload": "^3.0.1",
+    "@electron-toolkit/utils": "^3.0.0",
+    "koffi": "^2.9.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.19",
+    "electron": "^31.3.1",
+    "electron-builder": "^24.13.3",
+    "electron-vite": "^2.3.0",
+    "postcss": "^8.4.40",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tailwindcss": "^3.4.7",
+    "typescript": "^5.5.4",
+    "vite": "^5.3.5"
+  }
+}
