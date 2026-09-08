@@ -55,8 +55,8 @@ node scripts/make-icons.mjs   # generates tray + installer icons from the logo, 
 npm run dev
 ```
 
-The app starts in the system tray (menu bar on macOS) and opens the welcome window on
-first run.
+The app lives in the system tray (menu bar on macOS) and opens its window on every
+launch -- the welcome flow on first run, Settings after that.
 
 1. Paste your Anthropic API key into **Settings → Use my own Claude API key** and hit **Test**
 2. Highlight text in any app

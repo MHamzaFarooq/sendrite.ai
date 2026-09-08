@@ -1,11 +1,12 @@
 /**
  * Main process entry point.
  *
- * Sendrite is a tray-resident utility: there is no primary window, the app
- * stays alive with every window closed, and the only always-present UI is the
- * tray icon.
+ * Sendrite is tray-resident: the app stays alive with every window closed,
+ * and the tray icon is the only always-present UI. The Settings window is
+ * not persistent, but it does open on every launch (see main(), below) so
+ * that clicking the shortcut behaves like a normal app.
  */
-import { app, BrowserWindow, Notification, dialog } from 'electron'
+import { app, BrowserWindow, dialog } from 'electron'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { appendFileSync } from 'node:fs'
 import { join } from 'node:path'
@@ -82,20 +83,10 @@ async function main(): Promise<void> {
     })
   }
 
-  // First run opens the welcome flow. Returning launches show nothing by
-  // design (this is a tray app) -- which reads as "nothing happened" to a
-  // user who just double-clicked a shortcut. A launch is the one moment we
-  // know they're watching, so it's the right time to point at the tray icon
-  // -- Windows hides new tray icons in the overflow area by default, and
-  // that's the actual, most common reason people can't find the app.
-  if (!settings.onboarded) {
-    showSettingsWindow()
-  } else if (Notification.isSupported()) {
-    new Notification({
-      title: 'Sendrite is running',
-      body: 'Look for the icon in your system tray (click the ^ arrow if you don’t see it) to open Settings.'
-    }).show()
-  }
+  // Open on every launch, first run or not -- clicking the shortcut should
+  // behave like any other app. (Re-launching while already running takes
+  // the 'second-instance' path above, which does the same thing.)
+  showSettingsWindow()
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) showSettingsWindow()
