@@ -16,8 +16,8 @@ export function App(): JSX.Element {
   useEffect(() => {
     void window.sendrite.getSettings().then((s) => {
       setSettings(s)
-      // Returning users land on Settings; first run gets the welcome flow.
-      setTab(s.onboarded ? 'settings' : 'welcome')
+      // Every launch opens on the homepage, not just the very first one.
+      setTab('welcome')
       void window.sendrite.hasApiKey(s.provider).then(setKeySaved)
     })
   }, [])
