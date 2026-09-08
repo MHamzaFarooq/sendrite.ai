@@ -51,7 +51,7 @@ design decision was made — see **[ARCHITECTURE.md](ARCHITECTURE.md)**.
 git clone https://github.com/MHamzaFarooq/sendrite.ai.git
 cd sendrite.ai
 npm install
-node scripts/make-icons.mjs   # generates placeholder tray icons, run once
+node scripts/make-icons.mjs   # generates tray + installer icons from the logo, run once
 npm run dev
 ```
 

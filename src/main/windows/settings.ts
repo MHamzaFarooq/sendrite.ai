@@ -25,6 +25,7 @@ export function showSettingsWindow(): BrowserWindow {
     backgroundColor: '#05080f',
     titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
     autoHideMenuBar: true,
+    icon: join(__dirname, '../../resources/icon.png'),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false

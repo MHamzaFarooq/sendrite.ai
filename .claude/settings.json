@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(gh --version)",
+      "PowerShell(Write-Output \"GH_TOKEN set: $\\([bool]$env:GH_TOKEN\\)\"; Write-Output \"GITHUB_TOKEN set: $\\([bool]$env:GITHUB_TOKEN\\)\"; where.exe winget 2>$null; where.exe choco 2>$null)",
+      "Bash(git credential *)",
+      "Bash(curl -v -s -o /dev/null -w \"status=%{http_code}\\\\n\" https://api.github.com)",
+      "Bash(node_modules/.bin/asar list *)",
+      "Bash(grep -E \"^\\\\\\\\\\\\\\\\out\\\\\\\\\\\\\\\\main|^\\\\\\\\\\\\\\\\package.json$\")"
+    ]
+  }
+}
