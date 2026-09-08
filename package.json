@@ -1,6 +1,6 @@
 {
   "name": "sendrite",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Rewrite any text, in any app, without leaving the window.",
   "main": "./out/main/index.js",
   "author": "Sendrite",
@@ -30,9 +30,11 @@
     "electron": "^31.3.1",
     "electron-builder": "^24.13.3",
     "electron-vite": "^2.3.0",
+    "png2icons": "^2.0.1",
     "postcss": "^8.4.40",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "sharp": "^0.35.4",
     "tailwindcss": "^3.4.7",
     "typescript": "^5.5.4",
     "vite": "^5.3.5"

@@ -5,8 +5,10 @@
  * stays alive with every window closed, and the only always-present UI is the
  * tray icon.
  */
-import { app, BrowserWindow, dialog } from 'electron'
+import { app, BrowserWindow, Notification, dialog } from 'electron'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
+import { appendFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { registerIpcHandlers } from './ipc'
 import { registerHotkey, unregisterAll } from './hotkey'
 import { onHotkey } from './rewrite'
@@ -15,6 +17,21 @@ import { showSettingsWindow } from './windows/settings'
 import { createTray } from './tray'
 import { loadSettings } from './store'
 import { isKeyboardAvailable } from './native/keyboard'
+
+/**
+ * A tray-only app has no window to show a crash in. Without this, a failure
+ * on a user's machine is invisible to them and unreproducible for us.
+ */
+function logCrash(label: string, err: unknown): void {
+  try {
+    const line = `${new Date().toISOString()} [${label}] ${err instanceof Error ? err.stack : String(err)}\n`
+    appendFileSync(join(app.getPath('userData'), 'error.log'), line)
+  } catch {
+    // The log write itself failing is not something we can do anything about.
+  }
+}
+process.on('uncaughtException', (err) => logCrash('uncaughtException', err))
+process.on('unhandledRejection', (err) => logCrash('unhandledRejection', err))
 
 // Only one Sendrite may hold the global hotkey.
 if (!app.requestSingleInstanceLock()) {
@@ -65,8 +82,20 @@ async function main(): Promise<void> {
     })
   }
 
-  // First run opens the welcome flow.
-  if (!settings.onboarded) showSettingsWindow()
+  // First run opens the welcome flow. Returning launches show nothing by
+  // design (this is a tray app) -- which reads as "nothing happened" to a
+  // user who just double-clicked a shortcut. A launch is the one moment we
+  // know they're watching, so it's the right time to point at the tray icon
+  // -- Windows hides new tray icons in the overflow area by default, and
+  // that's the actual, most common reason people can't find the app.
+  if (!settings.onboarded) {
+    showSettingsWindow()
+  } else if (Notification.isSupported()) {
+    new Notification({
+      title: 'Sendrite is running',
+      body: 'Look for the icon in your system tray (click the ^ arrow if you don’t see it) to open Settings.'
+    }).show()
+  }
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) showSettingsWindow()
