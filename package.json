@@ -1,6 +1,6 @@
 {
   "name": "sendrite",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Rewrite any text, in any app, without leaving the window.",
   "main": "./out/main/index.js",
   "author": "Sendrite",
