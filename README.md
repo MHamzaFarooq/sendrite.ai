@@ -4,13 +4,13 @@
 
 Highlight text anywhere — Slack, a LinkedIn post, your notes app — press a hotkey, and a
 small floating button appears next to it. Click it and the highlighted text is replaced
-in place with an AI-improved version, powered by Claude.
+in place with an AI-improved version, using your choice of Claude, OpenAI, or Gemini.
 
 ![Sendrite welcome screen](reference/sendrite-1-welcome.png)
 
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS-2f9bff?style=flat-square)
 ![Built with Electron](https://img.shields.io/badge/built%20with-Electron-47848f?style=flat-square)
-![Powered by Claude](https://img.shields.io/badge/powered%20by-Claude-b56cf5?style=flat-square)
+![Providers](https://img.shields.io/badge/providers-Claude%20%7C%20OpenAI%20%7C%20Gemini-b56cf5?style=flat-square)
 ![Status](https://img.shields.io/badge/status-private%20beta-orange?style=flat-square)
 
 ---
@@ -22,7 +22,7 @@ in place with an AI-improved version, powered by Claude.
 3. Click **Rewrite** (or pick a style — shorten, formal, casual, fix grammar) and the text is replaced in place
 
 Under the hood: a global hotkey triggers a clipboard-based selection capture, a
-speculative Claude call starts firing before you even click, and the result is pasted
+speculative model call starts firing before you even click, and the result is pasted
 back over your original selection. The whole round trip is typically under 1.5 seconds.
 
 For the full technical breakdown — process architecture, security model, and why each
@@ -33,17 +33,18 @@ design decision was made — see **[ARCHITECTURE.md](ARCHITECTURE.md)**.
 - **Works everywhere** — any app that supports standard copy/paste, no per-app integration needed
 - **Never steals focus** — the button overlay is non-activating, so your source app stays in the foreground the whole time
 - **Five rewrite styles** — Improve, Shorten, Formal, Casual, Fix grammar
-- **Fast by default** — Claude Haiku 4.5 out of the box, with Sonnet 5 / Opus 5 available for higher-quality rewrites
+- **Choice of provider** — Claude (Anthropic), OpenAI, or Gemini (Google). Pick a tab, paste your key, hit Validate — Sendrite calls that provider's own model-listing endpoint and picks a fast model automatically, so there's never a stale hardcoded model name to keep up to date
 - **Predictive prefetch** — the rewrite starts while you're still reaching for the button, so it's usually ready by the time you click
-- **Your key, your data** — bring your own Anthropic API key, encrypted at rest with your OS keychain (DPAPI on Windows, Keychain on macOS). It never leaves your machine, and the app has no way to read it back out once saved
-- **Configurable hotkey, instant mode, and model choice** — all from a native settings window
+- **Your key, your data** — bring your own API key for whichever provider you use, encrypted at rest with your OS keychain (DPAPI on Windows, Keychain on macOS). It never leaves your machine, and the app has no way to read it back out once saved
+- **Configurable hotkey and instant mode** — all from a native settings window
 
 ## Getting started
 
 ### Prerequisites
 
 - Node.js 20+
-- An [Anthropic API key](https://console.anthropic.com/settings/keys)
+- An API key for at least one of: [Anthropic](https://console.anthropic.com/settings/keys),
+  [OpenAI](https://platform.openai.com/api-keys), or [Google AI Studio](https://aistudio.google.com/apikey)
 
 ### Install and run
 
@@ -58,7 +59,7 @@ npm run dev
 The app lives in the system tray (menu bar on macOS) and opens its window on every
 launch -- the welcome flow on first run, Settings after that.
 
-1. Paste your Anthropic API key into **Settings → Use my own Claude API key** and hit **Test**
+1. In **Settings → AI Provider**, pick a tab (Claude, OpenAI, or Gemini), paste your key, and hit **Validate**
 2. Highlight text in any app
 3. Press `Ctrl+Alt+Space` (`⌘⌥Space` on macOS)
 
@@ -74,7 +75,7 @@ needs no equivalent permission.
 | Setting | Default | Notes |
 |---|---|---|
 | Hotkey | `Ctrl+Alt+Space` | `Ctrl+Space` is deliberately blocked — it collides with IME switching and IDE autocomplete |
-| Model | Claude Haiku 4.5 | Sonnet 5 and Opus 5 selectable; Haiku is the default because this interaction lives or dies on latency |
+| Provider | Claude (Anthropic) | Whichever provider's key you validate most recently becomes active; the others stay saved |
 | Instant mode | Off | Skip the button and rewrite immediately on hotkey press |
 | Predictive prefetch | On | Start the rewrite while you're still reaching for the button |
 
@@ -106,7 +107,8 @@ another app, Sendrite shows a dialog at startup and opens Settings — pick anot
 ## Project status
 
 Sendrite is in **private beta**. The core rewrite flow — hotkey, selection capture,
-Claude call, paste-back — works end to end on both Windows and macOS.
+model call, paste-back — works end to end on both Windows and macOS, across all three
+supported providers.
 
 **Known limitations (v1):**
 - Selection capture is clipboard-based, which works in essentially every app but anchors
@@ -123,10 +125,10 @@ Claude call, paste-back — works end to end on both Windows and macOS.
 
 - Renderer processes run with `contextIsolation: true` and `nodeIntegration: false`;
   everything crosses process boundaries through an explicit preload allowlist
-- Your API key is encrypted at rest via Electron's `safeStorage` and is never exposed to
-  any renderer process
+- Each provider's API key is encrypted at rest via Electron's `safeStorage`, in its own
+  file, and is never exposed to any renderer process
 - No telemetry, no analytics, no data leaves your machine except the selected text sent
-  directly to Anthropic's API for the rewrite itself
+  directly to your chosen provider's API for the rewrite itself
 
 ## License
 

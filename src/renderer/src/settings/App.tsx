@@ -18,8 +18,8 @@ export function App(): JSX.Element {
       setSettings(s)
       // Returning users land on Settings; first run gets the welcome flow.
       setTab(s.onboarded ? 'settings' : 'welcome')
+      void window.sendrite.hasApiKey(s.provider).then(setKeySaved)
     })
-    void window.sendrite.hasApiKey().then(setKeySaved)
   }, [])
 
   const patch = async (p: Partial<Settings>): Promise<void> => {

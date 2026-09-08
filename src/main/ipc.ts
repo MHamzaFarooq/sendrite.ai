@@ -4,15 +4,9 @@
  */
 import { ipcMain, shell } from 'electron'
 import { IPC } from '@shared/ipc'
-import type { ModelId, PermissionStatus, RewriteMode, Settings } from '@shared/types'
-import {
-  clearApiKey,
-  hasApiKey,
-  loadSettings,
-  saveSettings,
-  setApiKey
-} from './store'
-import { testApiKey } from './ai'
+import type { PermissionStatus, Provider, RewriteMode, Settings } from '@shared/types'
+import { clearApiKey, hasApiKey, loadSettings, saveSettings } from './store'
+import { validateAndSaveKey } from './ai'
 import { applyRewrite, dismiss } from './rewrite'
 import { isAccessibilityTrusted } from './native/keyboard'
 import { registerHotkey } from './hotkey'
@@ -53,19 +47,19 @@ export function registerIpcHandlers(): void {
     if (process.platform === 'darwin') await shell.openExternal(MAC_A11Y_PANE)
   })
 
-  ipcMain.handle(IPC.setApiKey, async (_e, key: string): Promise<void> => setApiKey(key))
-  ipcMain.handle(IPC.hasApiKey, async (): Promise<boolean> => hasApiKey())
-  ipcMain.handle(IPC.clearApiKey, async (): Promise<void> => clearApiKey())
+  ipcMain.handle(IPC.hasApiKey, async (_e, provider: Provider): Promise<boolean> => hasApiKey(provider))
+  ipcMain.handle(IPC.clearApiKey, async (_e, provider: Provider): Promise<void> => clearApiKey(provider))
 
   ipcMain.handle(
-    IPC.testApiKey,
-    async (_e, key: string, model: ModelId): Promise<{ ok: boolean; message: string }> => {
-      try {
-        await testApiKey(key, model)
-        return { ok: true, message: 'Key valid' }
-      } catch (err) {
-        return { ok: false, message: err instanceof Error ? err.message : 'Key rejected' }
-      }
+    IPC.validateApiKey,
+    async (_e, provider: Provider, key: string): Promise<{ ok: boolean; message?: string }> => {
+      const result = await validateAndSaveKey(provider, key)
+      if (!result.ok) return { ok: false, message: result.message }
+
+      // A validated key becomes the active provider immediately -- there is
+      // no separate "select provider" step for the user to forget.
+      await saveSettings({ provider, model: result.model })
+      return { ok: true }
     }
   )
 

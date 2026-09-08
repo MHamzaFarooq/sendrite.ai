@@ -105,6 +105,7 @@ function startPrefetch(id: number, mode: RewriteMode): void {
     return rewrite({
       text: current.selection.text,
       mode,
+      provider: settings.provider,
       model: settings.model,
       signal: current.controller.signal
     })
@@ -135,6 +136,7 @@ export async function applyRewrite(mode: RewriteMode): Promise<void> {
         : await rewrite({
             text: current.selection.text,
             mode,
+            provider: settings.provider,
             model: settings.model,
             signal: current.controller.signal
           })

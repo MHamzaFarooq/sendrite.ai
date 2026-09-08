@@ -9,8 +9,8 @@ import { contextBridge, ipcRenderer } from 'electron'
 import { IPC } from '@shared/ipc'
 import type {
   ButtonState,
-  ModelId,
   PermissionStatus,
+  Provider,
   RewriteMode,
   Settings
 } from '@shared/types'
@@ -23,11 +23,10 @@ const api = {
   getPermissions: (): Promise<PermissionStatus> => ipcRenderer.invoke(IPC.getPermissions),
   requestAccessibility: (): Promise<void> => ipcRenderer.invoke(IPC.requestAccessibility),
 
-  setApiKey: (key: string): Promise<void> => ipcRenderer.invoke(IPC.setApiKey, key),
-  hasApiKey: (): Promise<boolean> => ipcRenderer.invoke(IPC.hasApiKey),
-  clearApiKey: (): Promise<void> => ipcRenderer.invoke(IPC.clearApiKey),
-  testApiKey: (key: string, model: ModelId): Promise<{ ok: boolean; message: string }> =>
-    ipcRenderer.invoke(IPC.testApiKey, key, model),
+  validateApiKey: (provider: Provider, key: string): Promise<{ ok: boolean; message?: string }> =>
+    ipcRenderer.invoke(IPC.validateApiKey, provider, key),
+  hasApiKey: (provider: Provider): Promise<boolean> => ipcRenderer.invoke(IPC.hasApiKey, provider),
+  clearApiKey: (provider: Provider): Promise<void> => ipcRenderer.invoke(IPC.clearApiKey, provider),
 
   runRewrite: (mode: RewriteMode): Promise<void> => ipcRenderer.invoke(IPC.runRewrite, mode),
   dismissButton: (): Promise<void> => ipcRenderer.invoke(IPC.dismissButton),

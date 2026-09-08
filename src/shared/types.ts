@@ -16,24 +16,28 @@ export const MODE_LABELS: Record<RewriteMode, string> = {
 }
 
 /**
- * Selectable models.
+ * Providers a user can bring their own key for.
  *
- * Default is Haiku 4.5: this interaction lives or dies on latency, and a
- * ~40-word rewrite does not need a frontier model. Sonnet 5 and Opus 5 are
- * exposed for users who want more quality per rewrite.
+ * There is deliberately no hardcoded model list: model names change too
+ * often to bake into the app. Instead, validating a key calls that
+ * provider's own `models.list()` endpoint and picks a fast default from
+ * whatever it actually returns -- see `main/ai/providers/`.
  */
-export const MODELS = ['claude-haiku-4-5', 'claude-sonnet-5', 'claude-opus-5'] as const
-export type ModelId = (typeof MODELS)[number]
+export const PROVIDERS = ['anthropic', 'openai', 'google'] as const
+export type Provider = (typeof PROVIDERS)[number]
 
-export const MODEL_LABELS: Record<ModelId, string> = {
-  'claude-haiku-4-5': 'Claude Haiku 4.5  ·  fastest',
-  'claude-sonnet-5': 'Claude Sonnet 5  ·  balanced',
-  'claude-opus-5': 'Claude Opus 5  ·  highest quality'
+export const PROVIDER_LABELS: Record<Provider, string> = {
+  anthropic: 'Claude (Anthropic)',
+  openai: 'OpenAI',
+  google: 'Gemini (Google)'
 }
 
 export interface Settings {
   hotkey: string
-  model: ModelId
+  /** Which of the user's saved keys is active for rewrites. */
+  provider: Provider
+  /** Model chosen automatically when the active provider's key was validated. */
+  model: string
   /** Fire the rewrite immediately on hotkey instead of waiting for a click. */
   instantMode: boolean
   /** Kick off the model call on hotkey so the answer is usually ready on click. */
@@ -45,7 +49,8 @@ export const DEFAULT_SETTINGS: Settings = {
   // Ctrl+Space collides with IME switching and IDE autocomplete, so the
   // default is the safer three-key combo.
   hotkey: 'CommandOrControl+Alt+Space',
-  model: 'claude-haiku-4-5',
+  provider: 'anthropic',
+  model: '',
   instantMode: false,
   prefetch: true,
   onboarded: false
