@@ -61,6 +61,10 @@ export async function loadSettings(): Promise<Settings> {
     // Spread over defaults so a settings file written by an older build
     // still boots after we add a field.
     cache = { ...DEFAULT_SETTINGS, ...(JSON.parse(raw) as Partial<Settings>) }
+    // A settings file from before per-provider model memory existed has
+    // `model` for the active provider but no `models` map -- backfill the
+    // one entry we know, without clobbering a map that already has it.
+    cache.models = { [cache.provider]: cache.model, ...cache.models }
   } catch {
     cache = { ...DEFAULT_SETTINGS }
   }

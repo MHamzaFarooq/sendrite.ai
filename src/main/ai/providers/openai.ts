@@ -28,6 +28,15 @@ function toRewriteError(err: unknown): RewriteError {
     return new RewriteError('That API key lacks access to this model.', 'auth')
   }
   if (err instanceof OpenAI.RateLimitError) {
+    // OpenAI reuses HTTP 429 for both true rate limiting and an exhausted/
+    // missing quota -- the SDK exposes which one via `code`. Quota errors
+    // are permanent until billing is fixed, so "try again shortly" is wrong.
+    if (err.code === 'insufficient_quota') {
+      return new RewriteError(
+        'This key has no usage quota. Add a payment method at platform.openai.com/settings/organization/billing.',
+        'auth'
+      )
+    }
     return new RewriteError('Rate limit reached. Try again shortly.', 'rate-limit')
   }
   if (err instanceof OpenAI.APIConnectionError) {

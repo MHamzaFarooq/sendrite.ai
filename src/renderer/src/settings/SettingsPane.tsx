@@ -22,6 +22,12 @@ const KEY_PLACEHOLDERS: Record<Provider, string> = {
   google: "AIza...",
 };
 
+const KEY_SIGNUP_URLS: Record<Provider, string> = {
+  anthropic: "https://console.anthropic.com/settings/keys",
+  openai: "https://platform.openai.com/api-keys",
+  google: "https://aistudio.google.com/apikey",
+};
+
 export function SettingsPane({
   settings,
   keySaved,
@@ -61,6 +67,12 @@ export function SettingsPane({
 
   const handleCleared = (provider: Provider): void => {
     setSavedByProvider((prev) => (prev ? { ...prev, [provider]: false } : prev));
+  };
+
+  // Switch the active provider without re-validating -- only possible once
+  // that provider's key has already passed validation at least once.
+  const handleActivate = async (provider: Provider): Promise<void> => {
+    await patch({ provider, model: settings.models[provider] ?? "" });
   };
 
   return (
@@ -127,6 +139,7 @@ export function SettingsPane({
           perms={perms}
           onValidated={() => void handleValidated(viewedProvider)}
           onCleared={() => handleCleared(viewedProvider)}
+          onActivate={() => void handleActivate(viewedProvider)}
         />
       </div>
 
@@ -173,6 +186,7 @@ function ProviderCard({
   perms,
   onValidated,
   onCleared,
+  onActivate,
 }: {
   provider: Provider;
   active: boolean;
@@ -180,6 +194,7 @@ function ProviderCard({
   perms: PermissionStatus | null;
   onValidated: () => void;
   onCleared: () => void;
+  onActivate: () => void;
 }): JSX.Element {
   const [keyInput, setKeyInput] = useState("");
   const [reveal, setReveal] = useState(false);
@@ -207,7 +222,12 @@ function ProviderCard({
         active && keySaved ? (
           <span className="text-sm font-medium text-emerald-400">✓ Active</span>
         ) : keySaved ? (
-          <span className="text-sm text-slate-400">Connected</span>
+          <button
+            onClick={onActivate}
+            className="rounded-full bg-accent/15 px-3 py-1 text-xs font-semibold text-accent transition hover:bg-accent/25"
+          >
+            Activate
+          </button>
         ) : (
           <span className="rounded-full bg-amber-500/15 px-3 py-1 text-xs font-semibold text-amber-300">
             Not connected
@@ -215,6 +235,18 @@ function ProviderCard({
         )
       }
     >
+      <p className="mt-1.5 text-sm text-slate-500">
+        Needs an API key from {PROVIDER_LABELS[provider]}.{" "}
+        <a
+          href={KEY_SIGNUP_URLS[provider]}
+          target="_blank"
+          rel="noreferrer"
+          className="text-accent hover:underline"
+        >
+          Get one here
+        </a>
+      </p>
+
       <div className="mt-4 flex gap-2.5">
         <div className="relative flex-1">
           <input

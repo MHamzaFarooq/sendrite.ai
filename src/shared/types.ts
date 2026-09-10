@@ -38,6 +38,12 @@ export interface Settings {
   provider: Provider
   /** Model chosen automatically when the active provider's key was validated. */
   model: string
+  /**
+   * The model picked for each provider whose key has passed validation, so
+   * switching back to an already-connected provider can reuse it instead of
+   * requiring the user to paste and validate that key again.
+   */
+  models: Partial<Record<Provider, string>>
   /** Fire the rewrite immediately on hotkey instead of waiting for a click. */
   instantMode: boolean
   /** Kick off the model call on hotkey so the answer is usually ready on click. */
@@ -51,6 +57,7 @@ export const DEFAULT_SETTINGS: Settings = {
   hotkey: 'CommandOrControl+Alt+Space',
   provider: 'anthropic',
   model: '',
+  models: {},
   instantMode: false,
   prefetch: true,
   onboarded: false

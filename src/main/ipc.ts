@@ -48,7 +48,13 @@ export function registerIpcHandlers(): void {
   })
 
   ipcMain.handle(IPC.hasApiKey, async (_e, provider: Provider): Promise<boolean> => hasApiKey(provider))
-  ipcMain.handle(IPC.clearApiKey, async (_e, provider: Provider): Promise<void> => clearApiKey(provider))
+  ipcMain.handle(IPC.clearApiKey, async (_e, provider: Provider): Promise<void> => {
+    await clearApiKey(provider)
+    // Forget the remembered model too -- a cleared key has nothing to reuse.
+    const current = await loadSettings()
+    const { [provider]: _removed, ...models } = current.models
+    await saveSettings({ models })
+  })
 
   ipcMain.handle(
     IPC.validateApiKey,
@@ -57,8 +63,14 @@ export function registerIpcHandlers(): void {
       if (!result.ok) return { ok: false, message: result.message }
 
       // A validated key becomes the active provider immediately -- there is
-      // no separate "select provider" step for the user to forget.
-      await saveSettings({ provider, model: result.model })
+      // no separate "select provider" step for the user to forget. Remember
+      // its model too, so switching back later doesn't require re-validating.
+      const current = await loadSettings()
+      await saveSettings({
+        provider,
+        model: result.model,
+        models: { ...current.models, [provider]: result.model }
+      })
       return { ok: true }
     }
   )
